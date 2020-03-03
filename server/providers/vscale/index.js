@@ -43,6 +43,10 @@ module.exports = class ProviderVscale {
         return 'stopped';
     }
 
+    static get ST_QUEUED() {
+        return 'queued';
+    }
+
     static get ST_BILLING() {
         return 'billing';
     }
@@ -60,8 +64,7 @@ module.exports = class ProviderVscale {
             .then(summarizeInfo)
             .then(excludeRegion)
             .then(excludeOutscope)
-            .then(convertToModel)
-        ;
+            .then(convertToModel);
 
         ////////////
 
@@ -116,33 +119,37 @@ module.exports = class ProviderVscale {
             function convertStatus(status) {
                 switch (status) {
                     case ProviderVscale.ST_DEFINED:
-                    {
-                        return InstanceModel.STARTING;
-                    }
+                        {
+                            return InstanceModel.STARTING;
+                        }
                     case ProviderVscale.ST_STARTED:
-                    {
-                        return InstanceModel.STARTED;
-                    }
+                        {
+                            return InstanceModel.STARTED;
+                        }
+                    case ProviderVscale.ST_QUEUED:
+                        {
+                            return InstanceModel.STARTING;
+                        }
                     case ProviderVscale.ST_STOPPED:
-                    {
-                        return InstanceModel.STOPPED;
-                    }
+                        {
+                            return InstanceModel.STOPPED;
+                        }
                     case ProviderVscale.ST_CREATED:
-                    {
-                        return InstanceModel.STARTING;
-                    }
+                        {
+                            return InstanceModel.STARTING;
+                        }
                     case ProviderVscale.ST_BILLING:
-                    {
-                        winston.error('[ProviderVscale] Error: Unsufficients funds');
+                        {
+                            winston.error('[ProviderVscale] Error: Unsufficients funds');
 
-                        return InstanceModel.ERROR;
-                    }
+                            return InstanceModel.ERROR;
+                        }
                     default:
-                    {
-                        winston.error('[ProviderVscale] Error: Found unknown status:', status);
+                        {
+                            winston.error('[ProviderVscale] Error: Found unknown status:', status);
 
-                        return InstanceModel.ERROR;
-                    }
+                            return InstanceModel.ERROR;
+                        }
                 }
             }
         }
@@ -154,8 +161,7 @@ module.exports = class ProviderVscale {
         winston.debug('[ProviderVscale] createInstances: count=%d', count);
 
         return init()
-            .spread((image, sshKey) => createInstances(count, image.id, sshKey.id))
-        ;
+            .spread((image, sshKey) => createInstances(count, image.id, sshKey.id));
 
 
         ////////////
@@ -182,7 +188,7 @@ module.exports = class ProviderVscale {
             function getImageByName(name) {
                 return self._api.getAllImages()
                     .then((images) => {
-                        const image = _.find(images, {name});
+                        const image = _.find(images, { name });
                         if (!image) {
                             throw new Error(`Cannot find image by name '${name}'`);
                         }
@@ -194,7 +200,7 @@ module.exports = class ProviderVscale {
             function getSSHkeyByName(name) {
                 return self._api.getAllSSHkeys()
                     .then((sshKeys) => {
-                        const sshKey = _.find(sshKeys, {name});
+                        const sshKey = _.find(sshKeys, { name });
                         if (!sshKey) {
                             throw new Error(`Cannot find ssh_key by name '${name}'`);
                         }
